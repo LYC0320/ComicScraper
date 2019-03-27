@@ -15,7 +15,7 @@ chrome_options.add_argument("--headless")
 urlHost = "https://tw.manhuagui.com"
 
 #user input
-urlPath = "/comic/13622/"
+urlPath = "/comic/4986/"
 
 jpgType = ".jpg"
 
@@ -32,7 +32,7 @@ def getTitle():
 				os.makedirs(path)
 
 def downloadPicture():
-	driver = webdriver.Chrome(executable_path = "C:/WebDriver/chromedriver.exe", chrome_options = chrome_options)
+	driver = webdriver.Chrome(executable_path = "./WebDriver/chromedriver.exe", chrome_options = chrome_options)
 	driver.get(urlHost + urlPath)
 	chapters = driver.find_elements_by_class_name("status0")
 	chapterTitles = []
@@ -74,3 +74,5 @@ def downloadPicture():
 
 getTitle()
 downloadPicture()
+
+#bug:/comic/27937/
