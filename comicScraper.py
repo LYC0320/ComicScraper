@@ -1,7 +1,6 @@
 from urllib.request import urlopen
 import urllib.request
 from bs4 import BeautifulSoup
-import re
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
@@ -9,6 +8,7 @@ import time
 from PIL import Image
 import os
 import xml.etree.ElementTree as ET
+import sys
 
 chrome_options = Options()
 chrome_options.add_argument("--headless") 
@@ -16,7 +16,9 @@ chrome_options.add_argument("--headless")
 urlHost = "https://tw.manhuagui.com"
 
 #user input
-urlPath = "/comic/31279/"
+urlPath = "/comic/13948/"
+if len(sys.argv) > 1:
+	urlPath = sys.argv[1]
 
 jpgType = ".jpg"
 
