@@ -9,6 +9,7 @@ import os
 import xml.etree.ElementTree as ET
 import sys
 import re
+import time
 
 chrome_options = Options()
 chrome_options.add_argument("--headless") 
@@ -16,7 +17,7 @@ chrome_options.add_argument("--headless")
 urlHost = "https://tw.manhuagui.com"
 
 # user input
-urlPath = "/comic/7580/"
+urlPath = "/comic/22434/"
 if len(sys.argv) > 1:
 	urlPath = sys.argv[1]
 
@@ -28,8 +29,11 @@ headers = {"Referer" : urlHost, "User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Wi
 
 newestFile = "Newest.xml"
 
+bsObj = ""
+
 def getTitle():
 	html = urlopen(urlHost + urlPath)
+	global bsObj
 	bsObj = BeautifulSoup(html.read(), features = "html.parser")
 	global path
 	path = "./" + bsObj.find("h1").get_text() + "/"
@@ -39,7 +43,14 @@ def getTitle():
 def downloadPicture():
 	driver = webdriver.Chrome(executable_path = "./WebDriver/chromedriver.exe", chrome_options = chrome_options)
 	driver.get(urlHost + urlPath)
+	
+	# check adult
+	if bsObj.find("a", {"id" : "checkAdult"}):
+		driver.add_cookie({"name" : "isAdult", "value" : "1"})
+		driver.refresh()
+
 	blockList = driver.find_elements_by_css_selector("div[class = 'chapter-list cf mt10']")
+
 	blockNum = len(blockList)
 
 	# create newest xml
@@ -149,5 +160,3 @@ def main():
 		updateCategory()
 
 main()
-
-# bug:/comic/27937/
