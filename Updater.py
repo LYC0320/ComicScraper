@@ -21,6 +21,8 @@ def updateComic():
 
 			if comicScraper.isUpdate:
 				print(comicScraper.comicTitle + " 更新至 " + comicScraper.outNewestTitle)
+
+				global updateComics
 				updateComics.update({comicScraper.comicTitle : comicScraper.outNewestTitle})
 				comicScraper.isUpdate = False
 
