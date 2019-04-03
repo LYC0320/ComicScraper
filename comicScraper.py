@@ -31,19 +31,30 @@ newestFile = "Newest.xml"
 
 bsObj = ""
 
+comicTitle = ""
+
+isUpdate = False
+
+outNewestTitle = ""
+
 def getTitle():
 	html = urlopen(urlHost + urlPath)
+
 	global bsObj
 	bsObj = BeautifulSoup(html.read(), features = "html.parser")
+
+	global comicTitle
+	comicTitle = bsObj.find("h1").get_text()
+
 	global path
-	path = "./" + bsObj.find("h1").get_text() + "/"
+	path = "./" + comicTitle + "/"
 	if not os.path.exists(path):
 				os.makedirs(path)
 
 def downloadPicture():
 	driver = webdriver.Chrome(executable_path = "./WebDriver/chromedriver.exe", chrome_options = chrome_options)
 	driver.get(urlHost + urlPath)
-	
+
 	# check adult
 	if bsObj.find("a", {"id" : "checkAdult"}):
 		driver.add_cookie({"name" : "isAdult", "value" : "1"})
@@ -122,10 +133,16 @@ def downloadPicture():
 					driver.switch_to.window(driver.window_handles[0])
 
 	# update newest
-	lastNewest.text = newestTitle
-	tree.write(xmlPath, "UTF-8")
-		
+	if lastNewest.text != newestTitle:
+			lastNewest.text = newestTitle
+			tree.write(xmlPath, "UTF-8")
 
+			global isUpdate
+			isUpdate = True
+
+			global outNewestTitle
+			outNewestTitle = newestTitle
+		
 def updateCategory():
 	xmlPath = "./Category.xml"
 
