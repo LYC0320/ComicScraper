@@ -6,6 +6,7 @@ updateComics = {}
 
 def updateComic():
 	xmlPath = "./Category.xml"
+	
 	if not os.path.exists(xmlPath):
 		print("Category.xml doesn't exist.")
 	else:
@@ -19,9 +20,11 @@ def updateComic():
 			comicScraper.downloadPicture()
 
 			if comicScraper.isUpdate:
-				print(comicScraper.comicTitle + "更新至" + comicScraper.outNewestTitle)
+				print(comicScraper.comicTitle + " 更新至 " + comicScraper.outNewestTitle)
 				updateComics.update({comicScraper.comicTitle : comicScraper.outNewestTitle})
-				isUpdate = False
+				comicScraper.isUpdate = False
+
+		print(updateComics)
 
 def main():
 	if __name__ == "__main__":
