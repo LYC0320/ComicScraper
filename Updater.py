@@ -14,6 +14,8 @@ def updateComic():
 		root = tree.getroot()
 		urlPaths = root.findall("urlPath")
 
+		f = open("AllNewest.txt", "w+")
+
 		for urlPath in urlPaths:
 			comicScraper.urlPath = urlPath.text
 			comicScraper.getTitle()
@@ -21,13 +23,12 @@ def updateComic():
 
 			if comicScraper.isUpdate:
 				print(comicScraper.comicTitle + " 更新至 " + comicScraper.outNewestTitle)
+				f.write(comicScraper.comicTitle + " 更新至 " + comicScraper.outNewestTitle + "\n")
 
 				global updateComics
 				updateComics.update({comicScraper.comicTitle : comicScraper.outNewestTitle})
 				comicScraper.isUpdate = False
-
-		print(updateComics)
-
+				
 def main():
 	if __name__ == "__main__":
 		updateComic()
