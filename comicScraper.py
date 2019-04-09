@@ -21,7 +21,7 @@ chrome_options.add_argument("--silent")
 urlHost = "https://tw.manhuagui.com"
 
 # user input
-urlPath = "/comic/22434/"
+urlPath = "/comic/1147/"
 if len(sys.argv) > 1:
 	urlPath = sys.argv[1]
 
@@ -83,7 +83,9 @@ def downloadPicture():
 
 	newestTitle = driver.find_element_by_css_selector("ul[style = 'display:block']").find_element_by_tag_name("a").get_attribute("title")
 
-	for block in range(0, blockNum):
+	block = 0
+
+	while block < blockNum:
 		epList = blockList[block].find_elements_by_tag_name("li")
 		epNum = len(epList)
 
@@ -103,6 +105,8 @@ def downloadPicture():
 
 			# update to the last newest
 			if lastNewest.text == chapterTitle:
+				# accelerate
+				block = blockNum - 1
 				break
 
 			chapter.click()
@@ -135,6 +139,7 @@ def downloadPicture():
 				else:
 					driver.close()
 					driver.switch_to.window(driver.window_handles[0])
+		block += 1
 
 	# update newest
 	if lastNewest.text != newestTitle:
