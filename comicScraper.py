@@ -10,6 +10,8 @@ import xml.etree.ElementTree as ET
 import sys
 import re
 import time
+from urllib.parse import quote
+import json
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
@@ -19,27 +21,38 @@ chrome_options.add_argument("--log-level=3");
 chrome_options.add_argument("--silent")
 
 urlHost = "https://tw.manhuagui.com"
+urlSearch = "/tools/word.ashx?"
+isWrite = False
+urlPath = "/comic/30501/"
+fileType = ".jpg"
+path = ""
+headers = {"Referer" : urlHost, "User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"}
+newestFile = "Newest.xml"
+bsObj = ""
+comicTitle = ""
+isUpdate = 0
+outNewestTitle = ""
+percentage = 0
 
 # user input
-urlPath = "/comic/1147/"
-if len(sys.argv) > 1:
+if len(sys.argv) == 2:
 	urlPath = sys.argv[1]
+elif len(sys.argv) == 3:
+	urlPath = sys.argv[1]
+	isWrite = sys.argv[2]
 
-jpgType = ".jpg"
+def writeFile(string):
+	if isWrite == "1":
+		f = open(comicTitle + ".txt", "w")
+		f.write(string)
+		f.close()
 
-path = ""
-
-headers = {"Referer" : urlHost, "User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36"}
-
-newestFile = "Newest.xml"
-
-bsObj = ""
-
-comicTitle = ""
-
-isUpdate = False
-
-outNewestTitle = ""
+def converToUrlPath(comicName):
+	keyString = "key=" + quote(comicName)
+	html = urlopen(urlHost + urlSearch + keyString)
+	bsObj = BeautifulSoup(html.read(), features = "html.parser").text
+	data = json.loads(bsObj)
+	return data
 
 def getTitle():
 	html = urlopen(urlHost + urlPath)
@@ -85,6 +98,15 @@ def downloadPicture():
 
 	block = 0
 
+	# compute percentage
+	epAll = 0
+	epCount = 0
+
+	for blockEle in blockList:
+		epList = blockEle.find_elements_by_tag_name("li")
+		epAll += len(epList)
+	# compute percentage
+
 	while block < blockNum:
 		epList = blockList[block].find_elements_by_tag_name("li")
 		epNum = len(epList)
@@ -96,6 +118,12 @@ def downloadPicture():
 		lastNewest = root.find("title")
 
 		for ep in range(0, epNum):
+
+			global percentage
+			percentage = round((epCount + ep) / epAll * 100)
+			writeFile(str(percentage))
+			
+
 			chapter = epList[ep].find_element_by_tag_name("a")
 			chapterTitle = chapter.get_attribute("title")
 
@@ -113,6 +141,9 @@ def downloadPicture():
 
 			for i in range(0, int(chapterNum)):
 				driver.switch_to.window(driver.window_handles[-1])
+
+				time.sleep(1)
+
 				picUrl = driver.find_element_by_id("mangaFile").get_attribute("src")
 				req = urllib.request.Request(url = picUrl, headers = headers)
 				data = urllib.request.urlopen(req).read()
@@ -131,7 +162,7 @@ def downloadPicture():
 					f.close()
 
 				tmpImg = Image.open(fileName).convert("RGB")
-				tmpImg.save(fileName + jpgType,"jpeg")
+				tmpImg.save(fileName + fileType,"jpeg")
 				os.remove(fileName)
 				
 				if i != int(chapterNum) - 1:
@@ -139,7 +170,13 @@ def downloadPicture():
 				else:
 					driver.close()
 					driver.switch_to.window(driver.window_handles[0])
+
+		epCount += epNum
+
 		block += 1
+		
+	percentage = 100
+	writeFile(str(percentage))
 
 	# update newest
 	if lastNewest.text != newestTitle:
@@ -175,6 +212,11 @@ def updateCategory():
 		subElement.text = urlPath
 		tree = ET.ElementTree(root)
 		tree.write(xmlPath)
+
+def main2():
+	getTitle()
+	downloadPicture()
+	updateCategory()
 
 def main():
 	if __name__ == "__main__":
