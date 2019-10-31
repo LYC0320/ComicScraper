@@ -12,12 +12,16 @@ import re
 import time
 from urllib.parse import quote
 import json
+from fake_useragent import UserAgent
+
+# Fake User Agent Instance
+ua = UserAgent()
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
 
 # hide log
-chrome_options.add_argument("--log-level=3"); 
+chrome_options.add_argument("--log-level=3")
 chrome_options.add_argument("--silent")
 
 urlHost = "https://tw.manhuagui.com"
@@ -26,7 +30,7 @@ isWrite = False
 urlPath = "/comic/30501/"
 fileType = ".jpg"
 path = ""
-headers = {"Referer" : urlHost, "User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"}
+headers = {"Referer" : urlHost, "User-Agent" : ua.random}
 newestFile = "Newest.xml"
 bsObj = ""
 comicTitle = ""
