@@ -14,7 +14,7 @@ def updateComic():
 		root = tree.getroot()
 		urlPaths = root.findall("urlPath")
 
-		f = open("AllNewest.txt", "w+")
+		f = open("AllNewest.txt", "w+", encoding = "utf-8")
 
 		for urlPath in urlPaths:
 			comicScraper.urlPath = urlPath.text

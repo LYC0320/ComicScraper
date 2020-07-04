@@ -12,6 +12,7 @@ import re
 import time
 from urllib.parse import quote
 import json
+import random
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
@@ -23,16 +24,17 @@ chrome_options.add_argument("--silent")
 urlHost = "https://tw.manhuagui.com"
 urlSearch = "/tools/word.ashx?"
 isWrite = False
-urlPath = "/comic/30501/"
+urlPath = "/comic/7580/"
 fileType = ".jpg"
 path = ""
-headers = {"Referer" : urlHost, "User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"}
+headers = {"Referer" : urlHost, "User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/ 81.0.4044.122 Safari/537.36"}
 newestFile = "Newest.xml"
 bsObj = ""
 comicTitle = ""
 isUpdate = 0
 outNewestTitle = ""
 percentage = 0
+interval = 2
 
 # user input
 if len(sys.argv) == 2:
@@ -64,7 +66,7 @@ def getTitle():
 	comicTitle = bsObj.find("h1").get_text()
 
 	global path
-	path = "./" + comicTitle + "/"
+	path = "./Comics/" + comicTitle + "/"
 	if not os.path.exists(path):
 				os.makedirs(path)
 
@@ -108,16 +110,25 @@ def downloadPicture():
 	# compute percentage
 
 	while block < blockNum:
+		
+		#prevent ban
+		interval = random.randint(2, 5)
+		time.sleep(interval)
+
 		epList = blockList[block].find_elements_by_tag_name("li")
 		epNum = len(epList)
 
-		# pagination
+		# pagination (攤開)
 		for page in blockList[block].find_elements_by_tag_name("ul"):
 			driver.execute_script("arguments[0].setAttribute('style' , 'display:block')", page)
 
 		lastNewest = root.find("title")
 
 		for ep in range(0, epNum):
+
+			#prevent ban
+			interval = random.randint(2, 5)
+			time.sleep(interval)
 
 			global percentage
 			percentage = round((epCount + ep) / epAll * 100)
@@ -126,6 +137,9 @@ def downloadPicture():
 
 			chapter = epList[ep].find_element_by_tag_name("a")
 			chapterTitle = chapter.get_attribute("title")
+			
+			# dir can not contain some chacracter
+			chapterTitle = chapterTitle.replace("?", "")
 
 			# 去p
 			chapterNum = chapter.find_element_by_tag_name("i").text
@@ -142,17 +156,20 @@ def downloadPicture():
 			for i in range(0, int(chapterNum)):
 				driver.switch_to.window(driver.window_handles[-1])
 
-				time.sleep(1)
+				#prevent ban
+				interval = random.randint(2, 5)
+				time.sleep(interval)
 
 				picUrl = driver.find_element_by_id("mangaFile").get_attribute("src")
 				req = urllib.request.Request(url = picUrl, headers = headers)
 				data = urllib.request.urlopen(req).read()
 				newDirectory = chapterTitle + "/"
+
 				fileName = path + newDirectory + chapterTitle + "_" + str(i + 1)
 				print(fileName)
 				if not os.path.exists(path + newDirectory):
 					os.makedirs(path + newDirectory)
-				elif len(os.listdir(path + newDirectory)) == int(chapterNum):
+				elif len(os.listdir(path + newDirectory)) >= int(chapterNum):
 					driver.close()
 					driver.switch_to.window(driver.window_handles[0])
 					break
